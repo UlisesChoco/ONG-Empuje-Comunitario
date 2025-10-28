@@ -12,7 +12,7 @@
     <h1>ONG Empuje Comunitario - Gestión de Donaciones</h1>
     <p class="slogan">“Trabajamos juntos por una comunidad más fuerte y solidaria.”</p>
     <%- include('../templates/navbarDonationReports') %>
-    <%- include('../templates/donationsReportFilters') %>
+    <%- include('../templates/donationsReportFilters', { exportType: 'made' }) %>
 
     <div id="success"></div>
     <div id="error"></div>
