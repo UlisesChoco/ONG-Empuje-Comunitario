@@ -226,27 +226,57 @@ const showSuccess = (message) => {
     event.preventDefault();
 
     try {
-        const response = await fetch("http://localhost:9091/api/export/donations", {
+        // Determinar el tipo de exportación desde el atributo data-export-type del botón
+        const btn = document.getElementById("generate-excel");
+        const exportType = btn ? btn.dataset.exportType : 'all';
+
+        // Construir URL con query param si corresponde
+        let fetchUrl = "http://localhost:9093/api/export/donations";
+        if (exportType && exportType !== 'all') {
+            fetchUrl += `?type=${encodeURIComponent(exportType)}`;
+        }
+
+        const response = await fetch(fetchUrl, {
             method: "GET"
         });
 
         if (!response.ok) {
-            throw new Error(`Error al generar el Excel: ${response.statusText}`);
+            throw new Error(`Error al generar el Excel: ${response.status} ${response.statusText}`);
         }
 
         const blob = await response.blob();
 
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
+        // Intentar obtener filename real desde el header Content-Disposition
+        let filename;
+        try {
+            const contentDisposition = response.headers.get('Content-Disposition') || response.headers.get('content-disposition');
+            if (contentDisposition) {
+                const match = /filename\*=UTF-8''([^;\n]+)|filename="?([^";\n]+)"?/.exec(contentDisposition);
+                if (match) {
+                    filename = match[1] ? decodeURIComponent(match[1]) : match[2];
+                }
+            }
+        } catch (err) {
+            console.warn('No se pudo parsear Content-Disposition:', err);
+        }
 
-        a.download = "donations.xlsx";
+        if (!filename) {
+            // Fallback según tipo
+            if (exportType === 'received') filename = 'donaciones_recibidas.xlsx';
+            else if (exportType === 'made') filename = 'donaciones_realizadas.xlsx';
+            else filename = 'donaciones.xlsx';
+        }
+
+        const objectUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = objectUrl;
+        a.download = filename;
 
         document.body.appendChild(a);
         a.click();
 
         a.remove();
-        window.URL.revokeObjectURL(url);
+        setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
 
     } catch (error) {
         console.error("Error descargando el Excel:", error);

@@ -40,7 +40,7 @@
             <button type="button" id="clear-filters">Limpiar filtros</button>
             <button type="button" id="save-filters">Guardar filtros</button>
             <button type="submit">Aplicar filtros</button>
-            <button type="submit" id="generate-excel">Generar Excel</button>
+            <button type="button" id="generate-excel" data-export-type="<%= typeof exportType !== 'undefined' ? exportType : 'all' %>">Generar Excel</button>
         </div>
     </form>
 </div>
