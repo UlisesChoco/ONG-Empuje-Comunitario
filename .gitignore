@@ -1,8 +1,5 @@
 .vscode
 .env
 .idea
-.env.template
 .gitignore
 .project
-tatus
-.gitignore
